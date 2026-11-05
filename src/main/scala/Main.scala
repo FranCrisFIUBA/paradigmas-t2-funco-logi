@@ -1,3 +1,5 @@
+import interpreter.Interpreter
+
 object Main {
   def main(args: Array[String]): Unit = {
     if (args.length < 2) {
@@ -29,15 +31,33 @@ object Main {
     // Cargar el archivo de conocimiento
     val conocimiento = scala.io.Source.fromFile(archivo).getLines().toList
 
-    // Procesar las consultas línea por línea: una respuesta por cada consulta
-    scala.io.Source.fromFile(archivoEntrada).getLines().foreach { consulta =>
-      println(procesarConsulta(consulta.trim, conocimiento))
+    // Para no repetir el procesado del conocimiento, se guarda en el interptreter
+    // la información necesaria para evaluar las consultas.
+    (
+      for
+        tokens <- tokenizer.tokenizeProlog(conocimiento)
+        clauses <- parser.parseProlog(tokens)
+        interpreter <- Interpreter.create(clauses)
+      yield interpreter
+    ) match {
+      case Left(error) => println(error.toString)
+      case Right(interpreter) =>
+        // Procesar las consultas línea por línea: una respuesta por cada consulta
+        scala.io.Source.fromFile(archivoEntrada).getLines().foreach { consulta =>
+          println(procesarConsulta(consulta.trim, interpreter))
+        }
     }
   }
 
-  def procesarConsulta(consulta: String, conocimiento: List[String]): String = {
+  def procesarConsulta(consulta: String, interpreter: Interpreter): String = {
     // Esta función debe implementar la lógica del TP.
     // Debe devolver "false", "true" o "true [(X=valor;...),...]" según el enunciado.
-    "false"
+    (
+      for 
+        tokens <- tokenizer.tokenizeQuery(consulta) 
+        query  <- parser.parseQuery(tokens) 
+        result <- interpreter.evalQuery(query) 
+      yield result
+    ).fold(_.toString, _.toString)
   }
 }
