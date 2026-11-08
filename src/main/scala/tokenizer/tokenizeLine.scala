@@ -6,7 +6,8 @@ import common.Span
 private val symbols: Map[Char, Token] = Map(
   '(' -> Token.LParen,
   ')' -> Token.RParen,
-  ',' -> Token.Comma
+  ',' -> Token.Comma,
+  '=' -> Token.Equals
 )
 
 /** Caracteres que pueden seguir a la primera letra de un identificador. */

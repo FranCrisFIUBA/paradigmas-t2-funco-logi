@@ -45,4 +45,9 @@ enum Token {
    * Separador entre encabezado y contenido de una regla `:-`
    */
   case RuleSep
+
+  /**
+   * Carácter ``=``, asigna el resultado de una operación: ``Z=add(X,Y)``
+   */
+  case Equals
 }
