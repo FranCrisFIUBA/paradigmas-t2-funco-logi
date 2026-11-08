@@ -29,9 +29,16 @@ private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerErr
       case c :: rest if c.isWhitespace => loop(rest, col + 1, acc)
       case c :: rest if symbols.contains(c) =>
         loop(rest, col + 1, SpannedToken(symbols(c), Span(row, col)) :: acc)
+      case '"' :: rest =>
+        val (content, afterContent) = rest.span(_ != '"')
+        afterContent match {
+          case '"' :: remaining =>
+            loop(remaining, col + content.length + 2, SpannedToken(Token.String(content.mkString), Span(row, col)) :: acc)
+          case _ => Left(TokenizerError.UnterminatedString(row, col))
+        }
       case ':' :: '-' :: rest =>
         loop(rest, col + 2, SpannedToken(Token.RuleSep, Span(row, col)) :: acc)
-      case c :: _ if c.isLetter =>
+      case c :: _ if c.isLetter || c == '_' =>
         val (name, rest) = chars.span(isIdentifierChar)
         loop(rest, col + name.length, SpannedToken(Token.Identifier(name.mkString), Span(row, col)) :: acc)
       case c :: _ if c.isDigit =>
