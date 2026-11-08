@@ -7,7 +7,8 @@ private val symbols: Map[Char, Token] = Map(
   '(' -> Token.LParen,
   ')' -> Token.RParen,
   ',' -> Token.Comma,
-  '=' -> Token.Equals
+  '=' -> Token.Equals,
+  '.' -> Token.Dot
 )
 
 /** Caracteres que pueden seguir a la primera letra de un identificador. */
@@ -28,6 +29,8 @@ private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerErr
       case c :: rest if c.isWhitespace => loop(rest, col + 1, acc)
       case c :: rest if symbols.contains(c) =>
         loop(rest, col + 1, SpannedToken(symbols(c), Span(row, col)) :: acc)
+      case ':' :: '-' :: rest =>
+        loop(rest, col + 2, SpannedToken(Token.RuleSep, Span(row, col)) :: acc)
       case c :: _ if c.isLetter =>
         val (name, rest) = chars.span(isIdentifierChar)
         loop(rest, col + name.length, SpannedToken(Token.Identifier(name.mkString), Span(row, col)) :: acc)
