@@ -30,6 +30,9 @@ private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerErr
       case c :: _ if c.isLetter =>
         val (name, rest) = chars.span(isIdentifierChar)
         loop(rest, col + name.length, SpannedToken(Token.Identifier(name.mkString), Span(row, col)) :: acc)
+      case c :: _ if c.isDigit =>
+        val (digits, rest) = chars.span(_.isDigit)
+        loop(rest, col + digits.length, SpannedToken(Token.Number(digits.mkString.toInt), Span(row, col)) :: acc)
       case c :: _ => Left(TokenizerError.UnexpectedCharacter(c, row, col))
     }
 
