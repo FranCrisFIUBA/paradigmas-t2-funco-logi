@@ -43,7 +43,11 @@ private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerErr
         loop(rest, col + name.length, SpannedToken(Token.Identifier(name.mkString), Span(row, col)) :: acc)
       case c :: _ if c.isDigit =>
         val (digits, rest) = chars.span(_.isDigit)
-        loop(rest, col + digits.length, SpannedToken(Token.Number(digits.mkString.toInt), Span(row, col)) :: acc)
+        val text = digits.mkString
+        text.toIntOption match {
+          case Some(value) => loop(rest, col + digits.length, SpannedToken(Token.Number(value), Span(row, col)) :: acc)
+          case None => Left(TokenizerError.InvalidNumber(text, row, col))
+        }
       case c :: _ => Left(TokenizerError.UnexpectedCharacter(c, row, col))
     }
 

@@ -36,4 +36,8 @@ class TokenizeQueryTest extends munit.FunSuite {
   test("un carácter inválido devuelve error con su fila y columna") {
     assertEquals(tokensOf("padre($)"), Left(TokenizerError.UnexpectedCharacter('$', 1, 7)))
   }
+
+  test("un número que no entra en un Int devuelve error en lugar de una excepción") {
+    assertEquals(tokensOf("edad(99999999999)"), Left(TokenizerError.InvalidNumber("99999999999", 1, 6)))
+  }
 }
