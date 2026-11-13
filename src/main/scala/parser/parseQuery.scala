@@ -4,12 +4,14 @@ import tokenizer.{SpannedToken, Token}
 import parser.AstNode.{Atom, Bool, Call, Number, Query, Value, Var}
 
 /** Determina si un identificador representa una variable (empieza con mayúscula o `_`). */
-private def isVarName(name: String): Boolean =
+private def isVarName(name: String): Boolean = {
   name.headOption.exists(c => c.isUpper || c == '_')
+}
 
 /** Determina si un identificador es un nombre de predicado válido (minúscula y no booleano). */
-private def isPredicateName(name: String): Boolean =
+private def isPredicateName(name: String): Boolean = {
   name.headOption.exists(_.isLower) && name != "true" && name != "false"
+}
 
 /**
  * Parsea un valor simple (número, string, booleano, variable o átomo)
@@ -17,7 +19,7 @@ private def isPredicateName(name: String): Boolean =
  */
 private[parser] def parseValue(
   tokens: List[SpannedToken]
-): Either[ParserError, (Value, List[SpannedToken])] =
+): Either[ParserError, (Value, List[SpannedToken])] = {
   tokens match {
     case Nil => Left(ParserError.UnexpectedEOF)
     case SpannedToken(Token.Number(n), _) :: rest =>
@@ -35,6 +37,7 @@ private[parser] def parseValue(
     case SpannedToken(token, span) :: _ =>
       Left(ParserError.UnexpectedToken(token, span))
   }
+}
 
 /** Parsea una lista no vacía de argumentos separados por coma hasta el `)` de cierre. */
 private def parseArgs(
@@ -44,7 +47,7 @@ private def parseArgs(
   def loop(
     remaining: List[SpannedToken],
     acc: List[Value]
-  ): Either[ParserError, (List[Value], List[SpannedToken])] =
+  ): Either[ParserError, (List[Value], List[SpannedToken])] = {
     parseValue(remaining) match {
       case Left(err) => Left(err)
       case Right((value, afterValue)) =>
@@ -60,6 +63,7 @@ private def parseArgs(
             Left(ParserError.UnexpectedEOF)
         }
     }
+  }
 
   loop(tokens, Nil)
 }
@@ -70,7 +74,7 @@ private def parseArgs(
  */
 private[parser] def parseCall(
   tokens: List[SpannedToken]
-): Either[ParserError, (Call, List[SpannedToken])] =
+): Either[ParserError, (Call, List[SpannedToken])] = {
   tokens match {
     case Nil => Left(ParserError.UnexpectedEOF)
     case SpannedToken(Token.Identifier(name), span) :: _ if !isPredicateName(name) =>
@@ -84,14 +88,16 @@ private[parser] def parseCall(
     case SpannedToken(token, span) :: _ =>
       Left(ParserError.UnexpectedToken(token, span))
   }
+}
 
 /**
  * Parsea una consulta completa a partir de su lista de tokens.
  * Verifica que no queden tokens sin consumir luego de la invocación principal.
  */
-def parseQuery(tokens: List[SpannedToken]): Either[ParserError, Query] =
+def parseQuery(tokens: List[SpannedToken]): Either[ParserError, Query] = {
   parseCall(tokens).flatMap {
     case (call, Nil) => Right(Query(call))
     case (_, SpannedToken(token, span) :: _) =>
       Left(ParserError.UnexpectedToken(token, span))
   }
+}
