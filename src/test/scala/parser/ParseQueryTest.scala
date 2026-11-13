@@ -6,25 +6,29 @@ import tokenizer.{SpannedToken, Token}
 
 class ParseQueryTest extends munit.FunSuite {
 
-  private def spanned(tokens: Token*): List[SpannedToken] =
+  private def spanned(tokens: Token*): List[SpannedToken] = {
     tokens.toList.zipWithIndex.map { case (tok, idx) =>
       SpannedToken(tok, Span(1, idx + 1))
     }
+  }
 
   private def expectedValue(
     value: Value,
     rest: List[SpannedToken] = Nil
-  ): Either[ParserError, (Value, List[SpannedToken])] =
+  ): Either[ParserError, (Value, List[SpannedToken])] = {
     Right((value, rest))
+  }
 
   private def expectedCall(
     call: Call,
     rest: List[SpannedToken] = Nil
-  ): Either[ParserError, (Call, List[SpannedToken])] =
+  ): Either[ParserError, (Call, List[SpannedToken])] = {
     Right((call, rest))
+  }
 
-  private def expectedQuery(call: Call): Either[ParserError, Query] =
+  private def expectedQuery(call: Call): Either[ParserError, Query] = {
     Right(Query(call))
+  }
 
   test("parseValue reconoce números enteros") {
     val tokens = spanned(Token.Number(42), Token.Comma)
