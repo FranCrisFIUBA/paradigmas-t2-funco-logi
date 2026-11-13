@@ -85,7 +85,13 @@ private[parser] def parseCall(
       Left(ParserError.UnexpectedToken(token, span))
   }
 
-def parseQuery(tokens: List[SpannedToken]): Either[ParserError, Query] = {
-  // TODO: Implementar
-  throw new NotImplementedError("prolog.tokenize") // Remover cuando se implemente
-}
+/**
+ * Parsea una consulta completa a partir de su lista de tokens.
+ * Verifica que no queden tokens sin consumir luego de la invocación principal.
+ */
+def parseQuery(tokens: List[SpannedToken]): Either[ParserError, Query] =
+  parseCall(tokens).flatMap {
+    case (call, Nil) => Right(Query(call))
+    case (_, SpannedToken(token, span) :: _) =>
+      Left(ParserError.UnexpectedToken(token, span))
+  }

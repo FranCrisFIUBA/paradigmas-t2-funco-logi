@@ -1,7 +1,7 @@
 package parser
 
 import common.Span
-import parser.AstNode.{Atom, Bool, Call, Number, Value, Var}
+import parser.AstNode.{Atom, Bool, Call, Number, Query, Value, Var}
 import tokenizer.{SpannedToken, Token}
 
 class ParseQueryTest extends munit.FunSuite {
@@ -22,6 +22,9 @@ class ParseQueryTest extends munit.FunSuite {
     rest: List[SpannedToken] = Nil
   ): Either[ParserError, (Call, List[SpannedToken])] =
     Right((call, rest))
+
+  private def expectedQuery(call: Call): Either[ParserError, Query] =
+    Right(Query(call))
 
   test("parseValue reconoce números enteros") {
     val tokens = spanned(Token.Number(42), Token.Comma)
@@ -104,5 +107,46 @@ class ParseQueryTest extends munit.FunSuite {
 
     val unclosed = spanned(Token.Identifier("padre"), Token.LParen, Token.Identifier("juan"))
     assertEquals(parseCall(unclosed), Left(ParserError.UnexpectedEOF))
+  }
+
+  test("parseQuery construye Query para consultas válidas con y sin variables") {
+    val withVars = spanned(
+      Token.Identifier("padre"), Token.LParen,
+      Token.Identifier("P"), Token.Comma, Token.Identifier("H"), Token.RParen
+    )
+    assertEquals(
+      parseQuery(withVars),
+      expectedQuery(Call("padre", List(Value(Var("P")), Value(Var("H")))))
+    )
+
+    val arityZero = spanned(Token.Identifier("es_cebra"), Token.LParen, Token.RParen)
+    assertEquals(parseQuery(arityZero), expectedQuery(Call("es_cebra", Nil)))
+
+    val withNumbers = spanned(
+      Token.Identifier("suma"), Token.LParen,
+      Token.Number(5), Token.Comma, Token.Number(3), Token.Comma, Token.Identifier("X"), Token.RParen
+    )
+    assertEquals(
+      parseQuery(withNumbers),
+      expectedQuery(Call("suma", List(Value(Number(5)), Value(Number(3)), Value(Var("X")))))
+    )
+  }
+
+  test("parseQuery rechaza consultas vacías") {
+    assertEquals(parseQuery(Nil), Left(ParserError.UnexpectedEOF))
+  }
+
+  test("parseQuery rechaza tokens sobrantes como punto final o texto adicional") {
+    val trailingDot = spanned(Token.Identifier("es_cebra"), Token.LParen, Token.RParen, Token.Dot)
+    assertEquals(parseQuery(trailingDot), Left(ParserError.UnexpectedToken(Token.Dot, Span(1, 4))))
+
+    val missingParens = spanned(Token.Identifier("padre"), Token.Identifier("juan"))
+    assertEquals(parseQuery(missingParens), Left(ParserError.UnexpectedToken(Token.Identifier("juan"), Span(1, 2))))
+
+    val extraCall = spanned(
+      Token.Identifier("a"), Token.LParen, Token.RParen,
+      Token.Identifier("b"), Token.LParen, Token.RParen
+    )
+    assertEquals(parseQuery(extraCall), Left(ParserError.UnexpectedToken(Token.Identifier("b"), Span(1, 4))))
   }
 }
