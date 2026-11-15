@@ -3,12 +3,14 @@ package tokenizer
 class TokenizePrologTest extends munit.FunSuite {
 
   /** Solo los tokens, sin posiciones. */
-  private def tokensOf(lines: List[String]): Either[TokenizerError, List[Token]] =
+  private def tokensOf(lines: List[String]): Either[TokenizerError, List[Token]] = {
     tokenizeProlog(lines).map(_.map(_.token))
+  }
 
   /** Las filas de las que salieron tokens, sin repetir. */
-  private def rowsOf(lines: List[String]): Either[TokenizerError, List[Int]] =
+  private def rowsOf(lines: List[String]): Either[TokenizerError, List[Int]] = {
     tokenizeProlog(lines).map(_.map(_.span.row).distinct)
+  }
 
   test("ignora los comentarios y las líneas vacías") {
     val lines = List("%% Hechos", "", "   ", "padre(juan,maria).")

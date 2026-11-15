@@ -12,7 +12,9 @@ private val symbols: Map[Char, Token] = Map(
 )
 
 /** Caracteres que pueden seguir a la primera letra de un identificador. */
-private def isIdentifierChar(c: Char): Boolean = c.isLetterOrDigit || c == '_'
+private def isIdentifierChar(c: Char): Boolean = {
+  c.isLetterOrDigit || c == '_'
+}
 
 /**
  * Tokeniza una sola línea.
@@ -23,7 +25,7 @@ private def isIdentifierChar(c: Char): Boolean = c.isLetterOrDigit || c == '_'
  */
 private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerError, List[SpannedToken]] = {
   @annotation.tailrec
-  def loop(chars: List[Char], col: Int, acc: List[SpannedToken]): Either[TokenizerError, List[SpannedToken]] =
+  def loop(chars: List[Char], col: Int, acc: List[SpannedToken]): Either[TokenizerError, List[SpannedToken]] = {
     chars match {
       case Nil => Right(acc.reverse)
       case c :: rest if c.isWhitespace => loop(rest, col + 1, acc)
@@ -50,6 +52,7 @@ private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerErr
         }
       case c :: _ => Left(TokenizerError.UnexpectedCharacter(c, row, col))
     }
+  }
 
   loop(line.toList, 1, Nil)
 }

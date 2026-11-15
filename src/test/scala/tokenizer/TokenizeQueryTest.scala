@@ -5,8 +5,9 @@ import common.Span
 class TokenizeQueryTest extends munit.FunSuite {
 
   /** Solo los tokens, sin posiciones, para los tests que no las verifican. */
-  private def tokensOf(query: String): Either[TokenizerError, List[Token]] =
+  private def tokensOf(query: String): Either[TokenizerError, List[Token]] = {
     tokenizeQuery(query).map(_.map(_.token))
+  }
 
   test("una consulta con átomos y variables devuelve sus tokens con fila y columna") {
     val expected = List(

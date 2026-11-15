@@ -9,7 +9,7 @@ package tokenizer
  */
 def tokenizeProlog(lines: List[String]): Either[TokenizerError, List[SpannedToken]] = {
   @annotation.tailrec
-  def loop(numbered: List[(String, Int)], acc: List[SpannedToken]): Either[TokenizerError, List[SpannedToken]] =
+  def loop(numbered: List[(String, Int)], acc: List[SpannedToken]): Either[TokenizerError, List[SpannedToken]] = {
     numbered match {
       case Nil => Right(acc)
       case (line, _) :: rest if isIgnored(line) => loop(rest, acc)
@@ -19,10 +19,12 @@ def tokenizeProlog(lines: List[String]): Either[TokenizerError, List[SpannedToke
           case Right(tokens) => loop(rest, acc ++ tokens)
         }
     }
+  }
 
   loop(lines.zipWithIndex, Nil)
 }
 
 /** Líneas que no se tokenizan: vacías o comentarios ``%%``. */
-private def isIgnored(line: String): Boolean =
+private def isIgnored(line: String): Boolean = {
   line.trim.isEmpty || line.trim.startsWith("%%")
+}
