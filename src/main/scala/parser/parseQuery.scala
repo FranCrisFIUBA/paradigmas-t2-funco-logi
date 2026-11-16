@@ -14,7 +14,7 @@ private def isPredicateName(name: String): Boolean = {
 }
 
 /**
- * Parsea un valor simple (número, string, booleano, variable o átomo)
+ * Parsea un valor (número, string, llamada, booleano, variable o átomo)
  * desde el inicio de la lista de tokens.
  */
 private[parser] def parseValue(
@@ -26,6 +26,9 @@ private[parser] def parseValue(
       Right((Value(Number(n)), rest))
     case SpannedToken(Token.String(s), _) :: rest =>
       Right((Value(Atom(s)), rest))
+    case SpannedToken(Token.Identifier(_), _) :: SpannedToken(Token.LParen, _) :: _ => {
+      parseCall(tokens).map { case (call, rest) => (Value(call), rest) }
+    }
     case SpannedToken(Token.Identifier("true"), _) :: rest =>
       Right((Value(Bool(true)), rest))
     case SpannedToken(Token.Identifier("false"), _) :: rest =>
