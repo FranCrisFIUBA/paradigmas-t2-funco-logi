@@ -64,6 +64,32 @@ class ParseQueryTest extends munit.FunSuite {
     assertEquals(parseValue(tokens), Left(ParserError.UnexpectedToken(Token.Comma, Span(1, 1))))
   }
 
+  test("parseValue reconoce una llamada como valor (simple y anidada)") {
+    val simpleCall = spanned(
+      Token.Identifier("add"), Token.LParen,
+      Token.Identifier("X"), Token.Comma, Token.Identifier("Y"), Token.RParen
+    )
+    assertEquals(
+      parseValue(simpleCall),
+      expectedValue(Value(Call("add", List(Value(Var("X")), Value(Var("Y"))))))
+    )
+
+    val nestedCall = spanned(
+      Token.Identifier("mult"), Token.LParen,
+      Token.Identifier("add"), Token.LParen, Token.Identifier("X"), Token.Comma, Token.Identifier("Y"), Token.RParen,
+      Token.Comma, Token.Number(2), Token.RParen
+    )
+    assertEquals(
+      parseValue(nestedCall),
+      expectedValue(Value(Call("mult", List(Value(Call("add", List(Value(Var("X")), Value(Var("Y"))))), Value(Number(2))))))
+    )
+  }
+
+  test("parseValue rechaza llamadas con nombre de predicado inválido") {
+    val invalid = spanned(Token.Identifier("Padre"), Token.LParen, Token.Identifier("juan"), Token.RParen)
+    assertEquals(parseValue(invalid), Left(ParserError.InvalidPredicateName("Padre", Span(1, 1))))
+  }
+
   test("parseCall reconoce un predicado de aridad 0 con paréntesis vacíos") {
     val tokens = spanned(Token.Identifier("es_cebra"), Token.LParen, Token.RParen)
     assertEquals(parseCall(tokens), expectedCall(Call("es_cebra", Nil)))
