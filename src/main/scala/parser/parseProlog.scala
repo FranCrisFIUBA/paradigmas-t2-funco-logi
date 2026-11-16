@@ -13,6 +13,33 @@ def parseProlog(tokens: List[SpannedToken]): Either[ParserError, List[Clause]] =
   throw new NotImplementedError("prolog.tokenize") // Remover cuando se implemente
 }
 
+/** Parsea el cuerpo de una cláusula si está presente (tras el operador de regla), o retorna una lista vacía si no hay cuerpo. */
+private def parseBody(tokens: List[SpannedToken]): Either[ParserError, (List[Term], List[SpannedToken])] = {
+  tokens match {
+    case SpannedToken(Token.RuleSep, _) :: rest => parseGoals(rest)
+    case _  => Right((Nil, tokens))
+  }
+}
+
+/** Parsea una secuencia de metas (goals) (o condiciones) separadas por comas dentro del cuerpo de una cláusula. */
+private def parseGoals(tokens: List[SpannedToken]): Either[ParserError, (List[Term], List[SpannedToken])] = {
+  @annotation.tailrec
+  def loop(
+            remaining: List[SpannedToken],
+            acc: List[Term]
+          ): Either[ParserError, (List[Term], List[SpannedToken])] = {
+    parseGoal(remaining) match {
+      case Left(error) => Left(error)
+      case Right((goal, after)) =>
+        after match {
+          case SpannedToken(Token.Comma, _) :: rest => loop(rest, goal :: acc)
+          case _  => Right(((goal :: acc).reverse, after))
+        }
+    }
+  }
+  loop(tokens, Nil)
+}
+
 /** Parsea una meta individual, identificando si es una asignación, una variable, un booleano o una llamada general. */
 private def parseGoal(tokens: List[SpannedToken]): Either[ParserError, (Term, List[SpannedToken])] = {
   tokens match {
