@@ -8,9 +8,34 @@ private def isVarName(name: String): Boolean = {
   name.headOption.exists(c => c.isUpper || c == '_')
 }
 
+/** Parsea una lista completa de tokens convirtiéndola en una lista de cláusulas de Prolog. */
 def parseProlog(tokens: List[SpannedToken]): Either[ParserError, List[Clause]] = {
-  // TODO: Implementar
-  throw new NotImplementedError("prolog.tokenize") // Remover cuando se implemente
+  @annotation.tailrec
+  def loop(
+            remaining: List[SpannedToken],
+            acc: List[Clause]
+          ): Either[ParserError, List[Clause]] = {
+    remaining match {
+      case Nil => Right(acc.reverse)
+      case _ =>
+        parseClause(remaining) match {
+          case Left(error)           => Left(error)
+          case Right((clause, next)) => loop(next, clause :: acc)
+        }
+    }
+  }
+  loop(tokens, Nil)
+}
+
+/** Parsea una única cláusula de Prolog (compuesta por una cabeza, un cuerpo y un punto final). */
+private def parseClause(tokens: List[SpannedToken]): Either[ParserError, (Clause, List[SpannedToken])] = {
+  parseCall(tokens).flatMap { case (head, afterHead) =>
+    parseBody(afterHead).flatMap { case (terms, afterBody) =>
+      expectDot(afterBody).map { afterDot =>
+        (Clause(head.name, head.args, terms), afterDot)
+      }
+    }
+  }
 }
 
 /** Parsea el cuerpo de una cláusula si está presente (tras el operador de regla), o retorna una lista vacía si no hay cuerpo. */
