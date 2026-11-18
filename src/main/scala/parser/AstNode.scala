@@ -77,5 +77,5 @@ enum AstNode {
   /**
    * Consulta.
    */
-  case Query(query: Call)
+  case Query(call: Call)
 }
