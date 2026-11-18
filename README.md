@@ -61,6 +61,12 @@ chmod +x test_runner.sh
 
 El script compila con `sbt compile`, ejecuta `sbt "run ejemplos/programas/<caso>.pl ejemplos/inputs/<caso>.txt"` para cada caso y compara la salida (filtrando los logs de sbt) con `ejemplos/outputs/<caso>.res`.
 
+## Cómo correr los tests unitarios
+
+```bash
+sbt test
+```
+
 ## Formato de los archivos de ejemplo
 
 ### Base de conocimientos (`ejemplos/programas/<caso>.pl`)
