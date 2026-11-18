@@ -1,0 +1,10 @@
+puedeLlegar(retiro,belgrano,1)
+puedeLlegar(retiro,nunez,1)
+puedeLlegar(retiro,nunez,2)
+puedeLlegar(retiro,Destino,1)
+nombreValido("hola mundo")
+nombreValido("abc")
+nombreValido("")
+esIgual("paradigmas","paradigmas")
+esIgual("paradigmas","algo3")
+
