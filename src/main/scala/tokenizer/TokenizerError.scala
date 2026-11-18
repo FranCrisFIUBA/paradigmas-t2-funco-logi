@@ -1,5 +1,7 @@
 package tokenizer
 
+import common.Error
+
 enum TokenizerError(message: String) extends Error(message) {
   /**
    * Se encontro un ``(`` en algún lugar del codigo, pero no
