@@ -7,4 +7,3 @@ nombreValido("abc")
 nombreValido("")
 esIgual("paradigmas","paradigmas")
 esIgual("paradigmas","algo3")
-
