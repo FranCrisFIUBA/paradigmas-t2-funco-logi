@@ -18,7 +18,7 @@ final case class Interpreter private (
     }
 
   private def evalCall(call: Call): InterpreterResult = {
-    val queryVars = call.args.collect { case Value(Var(name)) => name }.distinct
+    val queryVars = Interpreter.collectVars(call.args)
     val states = solve(List(Term(call)), State.empty)
 
     if (queryVars.isEmpty) {
@@ -225,4 +225,13 @@ object Interpreter {
 
   private def validateValues(values: List[Value]): Option[InterpreterError] =
     values.iterator.flatMap(validateValue).nextOption()
+
+  /** Recolecta los nombres de todas las variables presentes en una lista de valores (incluyendo términos compuestos). */
+  private def collectVars(values: List[Value]): List[String] = {
+    values.flatMap {
+      case Value(Var(name)) => List(name)
+      case Value(Call(_, args)) => collectVars(args)
+      case _ => Nil
+    }.distinct
+  }
 }
