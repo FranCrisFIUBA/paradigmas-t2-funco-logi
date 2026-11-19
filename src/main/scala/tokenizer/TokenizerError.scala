@@ -1,5 +1,7 @@
 package tokenizer
 
+import common.Error
+
 enum TokenizerError(message: String) extends Error(message) {
   /**
    * Se encontro un ``(`` en algún lugar del codigo, pero no
@@ -32,4 +34,10 @@ enum TokenizerError(message: String) extends Error(message) {
    */
   case UnexpectedCharacter(c: Char, row: Int, col: Int)
     extends TokenizerError(s"Carácter '$c' en $row:$col no esperado.")
+
+  /**
+   * Se encontró un número que no entra en un entero (``Int``).
+   */
+  case InvalidNumber(text: String, row: Int, col: Int)
+    extends TokenizerError(s"Número '$text' en $row:$col no válido.")
 }

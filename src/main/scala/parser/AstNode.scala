@@ -33,7 +33,7 @@ enum AstNode {
    * Valores. Usados como parámetros o argumentos.
    * Las variables y atómicos son tratados como valores por conveniencia.
    */
-  case Value(value: Var | Number | Bool | Atom)
+  case Value(value: Var | Number | Bool | Atom | Call)
 
   /**
    * Llamado/evaluación a una cláusula.
@@ -77,5 +77,5 @@ enum AstNode {
   /**
    * Consulta.
    */
-  case Query(query: Call)
+  case Query(call: Call)
 }

@@ -7,6 +7,5 @@ package tokenizer
  * @return Lista de tokens para el parser o error
  */
 def tokenizeQuery(line: String): Either[TokenizerError, List[SpannedToken]] = {
-  // TODO: Implementar
-  throw new NotImplementedError("prolog.tokenize") // Remover cuando se implemente
+  tokenizeLine(line, 1)
 }

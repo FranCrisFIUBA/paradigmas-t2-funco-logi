@@ -9,4 +9,5 @@ lazy val root = (project in file("."))
     // cuando se usa `sbt run < entrada.txt`, el script Bash o terminales/IDE tipo IntelliJ/WSL.
     Compile / run / fork := true,
     Compile / run / connectInput := true,
+    libraryDependencies += "org.scalameta" %% "munit" % "1.0.2" % Test,
   )

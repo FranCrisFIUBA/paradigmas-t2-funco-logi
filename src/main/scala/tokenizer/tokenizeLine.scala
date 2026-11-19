@@ -1,0 +1,58 @@
+package tokenizer
+
+import common.Span
+
+/** Símbolos de un solo carácter y el token que les corresponde. */
+private val symbols: Map[Char, Token] = Map(
+  '(' -> Token.LParen,
+  ')' -> Token.RParen,
+  ',' -> Token.Comma,
+  '=' -> Token.Equals,
+  '.' -> Token.Dot
+)
+
+/** Caracteres que pueden seguir a la primera letra de un identificador. */
+private def isIdentifierChar(c: Char): Boolean = {
+  c.isLetterOrDigit || c == '_'
+}
+
+/**
+ * Tokeniza una sola línea.
+ *
+ * @param line Texto de la línea
+ * @param row  Número de línea, para ubicar tokens y errores
+ * @return Lista de tokens o error
+ */
+private[tokenizer] def tokenizeLine(line: String, row: Int): Either[TokenizerError, List[SpannedToken]] = {
+  @annotation.tailrec
+  def loop(chars: List[Char], col: Int, acc: List[SpannedToken]): Either[TokenizerError, List[SpannedToken]] = {
+    chars match {
+      case Nil => Right(acc.reverse)
+      case c :: rest if c.isWhitespace => loop(rest, col + 1, acc)
+      case c :: rest if symbols.contains(c) =>
+        loop(rest, col + 1, SpannedToken(symbols(c), Span(row, col)) :: acc)
+      case '"' :: rest =>
+        val (content, afterContent) = rest.span(_ != '"')
+        afterContent match {
+          case '"' :: remaining =>
+            loop(remaining, col + content.length + 2, SpannedToken(Token.String(content.mkString), Span(row, col)) :: acc)
+          case _ => Left(TokenizerError.UnterminatedString(row, col))
+        }
+      case ':' :: '-' :: rest =>
+        loop(rest, col + 2, SpannedToken(Token.RuleSep, Span(row, col)) :: acc)
+      case c :: _ if c.isLetter || c == '_' =>
+        val (name, rest) = chars.span(isIdentifierChar)
+        loop(rest, col + name.length, SpannedToken(Token.Identifier(name.mkString), Span(row, col)) :: acc)
+      case c :: _ if c.isDigit =>
+        val (digits, rest) = chars.span(_.isDigit)
+        val text = digits.mkString
+        text.toIntOption match {
+          case Some(value) => loop(rest, col + digits.length, SpannedToken(Token.Number(value), Span(row, col)) :: acc)
+          case None => Left(TokenizerError.InvalidNumber(text, row, col))
+        }
+      case c :: _ => Left(TokenizerError.UnexpectedCharacter(c, row, col))
+    }
+  }
+
+  loop(line.toList, 1, Nil)
+}

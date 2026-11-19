@@ -5,7 +5,7 @@ enum Token {
    * Nombres de cláusulas y variables.
    * @param name Nombre del identificador
    */
-  case Identifier(name: String)
+  case Identifier(name: Predef.String)
 
   /**
    * Número literal (entero)
@@ -17,7 +17,7 @@ enum Token {
    * String literal
    * @param value Cadena de caracteres (sin las comillas)
    */
-  case String(value: String)
+  case String(value: Predef.String)
 
   /**
    * Carácter ``(``
@@ -45,4 +45,9 @@ enum Token {
    * Separador entre encabezado y contenido de una regla `:-`
    */
   case RuleSep
+
+  /**
+   * Carácter ``=``, asigna el resultado de una operación: ``Z=add(X,Y)``
+   */
+  case Equals
 }
